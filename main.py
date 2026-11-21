@@ -6,6 +6,7 @@ ESTUDIANTE 5: SIMULACIÓN DE 10 OPERACIONES (Miguel Villegas Correa)
 
 import Cliente as mod_cliente
 import Servicio as mod_servicio
+from ServiciosEspecializados import (ServicioAlquilerEquipos, ServicioAsesoriaEspecializada)
 from LoggerConfig import configurar_logs
 
 # Se activa el log
@@ -32,46 +33,6 @@ ServicioReservaSalas = mod_servicio.ServicioReservaSalas
 # ==============================================================================
 # CLASES COMPLEMENTARIAS PARA COMPLETAR EL SISTEMA
 # ==============================================================================
-
-class ServicioAlquilerEquipos(Servicio):
-    def __init__(self, id_servicio: str, nombre: str, tarifa_base: float, stock: int):
-        super().__init__(id_servicio, nombre, tarifa_base)
-        if isinstance(stock, bool) or not isinstance(stock, int) or stock <= 0:
-            raise ServicioInvalidDataError("El stock debe ser un entero mayor que cero.")
-        self.__stock = stock
-
-    def validar_parametros(self, duracion_horas: float, cantidad: int = 1, **kwargs) -> bool:
-        if isinstance(duracion_horas, bool) or not isinstance(duracion_horas, (int, float)) or duracion_horas <= 0:
-            raise ServicioInvalidDataError("La duración debe ser mayor que cero.")
-        if cantidad > self.__stock:
-            raise ServicioNoDisponibleError(f"Solo hay {self.__stock} equipos disponibles.")
-        return True
-
-    def calcular_costo(self, duracion_horas: float, cantidad: int = 1, **kwargs) -> float:
-        self.validar_parametros(duracion_horas, cantidad)
-        return self.tarifa_base * duracion_horas * cantidad
-
-    def describir_servicio(self) -> str:
-        return f"Alquiler de equipos | ID: {self.id_servicio} | Nombre: {self.nombre} | Stock: {self.__stock}"
-
-class ServicioAsesoria(Servicio):
-    def __init__(self, id_servicio: str, nombre: str, tarifa_base: float, especialidad: str):
-        super().__init__(id_servicio, nombre, tarifa_base)
-        if not isinstance(especialidad, str) or not especialidad.strip():
-            raise ParametrosFaltantesError("especialidad")
-        self.__especialidad = especialidad.strip()
-
-    def validar_parametros(self, duracion_horas: float, **kwargs) -> bool:
-        if isinstance(duracion_horas, bool) or not isinstance(duracion_horas, (int, float)) or duracion_horas <= 0:
-            raise ServicioInvalidDataError("Las horas deben ser mayores a cero.")
-        return True
-
-    def calcular_costo(self, duracion_horas: float, **kwargs) -> float:
-        self.validar_parametros(duracion_horas)
-        return self.tarifa_base * duracion_horas * 1.20
-
-    def describir_servicio(self) -> str:
-        return f"Asesoría | ID: {self.id_servicio} | Nombre: {self.nombre} | Especialidad: {self.__especialidad}"
 
 class Reserva(EntidadBase):
     def __init__(self, id_reserva: str, cliente: Cliente, servicio: Servicio, duracion_horas: float, **parametros):
@@ -144,8 +105,8 @@ def ejecutar_simulacion():
     # OP 3: Creación exitosa de los 3 Servicios
     try:
         s_sala = ServicioReservaSalas("SAL-01", "Sala Principal", 50000, 12, {"proyector": 20000})
-        s_equipo = ServicioAlquilerEquipos("EQU-01", "Portátil i7", 25000, stock=8)
-        s_asesoria = ServicioAsesoria("ASE-01", "Asesoría Python", 90000, especialidad="Backend")
+        s_equipo = ServicioAlquilerEquipos("EQU-01", "Portátil i7", 25000, "Computador portátil", 8)
+        s_asesoria = ServicioAsesoriaEspecializada("ASE-01", "Asesoría Python", 90000, "Backend", "Virtual")
     except SoftwareFJError as e:
         logger.error(f"[OP-03 ERROR] {e}")
     else:
@@ -164,10 +125,10 @@ def ejecutar_simulacion():
 
     # OP 5: Creación inválida por Parámetro Faltante
     try:
-        ServicioAsesoria("ASE-02", "Asesoría Cloud", 80000, especialidad="")
-    except ParametrosFaltantesError as e:
+        ServicioAsesoriaEspecializada("ASE-02", "Asesoría Cloud", 80000, "", "Virtual")
+    except ServicioInvalidDataError as e:
         logger.error(f"[OP-05 CONTROLADA] {e}")
-
+        
     # OP 6: Reserva exitosa (IVA 19% y Descuento 10%)
     try:
         r1 = Reserva("RES-01", clientes[0], servicios[0], duracion_horas=3, numero_personas=8, recursos_solicitados=["proyector"])
