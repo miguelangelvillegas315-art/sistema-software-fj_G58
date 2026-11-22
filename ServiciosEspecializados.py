@@ -8,12 +8,11 @@
 import logging
 import math
 
-from Servicio import (
-    Servicio,
+from Servicio import Servicio
+from Excepciones import (
     ServicioError,
     ServicioInvalidDataError,
-    ServicioNoDisponibleError
-)
+    ServicioNoDisponibleError)
 
 logger = logging.getLogger(__name__)
 
