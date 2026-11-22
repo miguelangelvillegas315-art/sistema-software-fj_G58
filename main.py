@@ -104,7 +104,7 @@ def ejecutar_simulacion():
 
     # OP 3: Creación exitosa de los 3 Servicios
     try:
-        s_sala = ServicioReservaSalas("SAL-01", "Sala Principal", 50000, 12, {"proyector": 20000})
+        s_sala = ServicioReservaSalas("SAL-01", "Sala Principal", 50000, 12, costo_proyector=20000)
         s_equipo = ServicioAlquilerEquipos("EQU-01", "Portátil i7", 25000, "Computador portátil", 8)
         s_asesoria = ServicioAsesoriaEspecializada("ASE-01", "Asesoría Python", 90000, "Backend", "Virtual")
     except SoftwareFJError as e:
@@ -131,7 +131,7 @@ def ejecutar_simulacion():
         
     # OP 6: Reserva exitosa (IVA 19% y Descuento 10%)
     try:
-        r1 = Reserva("RES-01", clientes[0], servicios[0], duracion_horas=3, numero_personas=8, recursos_solicitados=["proyector"])
+        r1 = Reserva("RES-01", clientes[0], servicios[0], duracion_horas=3, numero_personas=8, proyector=True)
         r1.confirmar(impuesto=19.0, descuento=10.0)
     except SoftwareFJError as e:
         logger.error(f"[OP-06 ERROR] {e}")
